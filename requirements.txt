@@ -1,0 +1,12 @@
+django
+djangorestframework
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+shap
+joblib
+xgboost
+django-crispy-forms
+crispy-bootstrap5

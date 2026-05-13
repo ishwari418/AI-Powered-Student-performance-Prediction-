@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student - EduPredict AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirm Delete</h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">Are you sure you want to delete student <strong>{{ object.first_name }} {{ object.last_name }}</strong>?</p>
+                <p class="text-muted small">This action cannot be undone and will delete all associated performance records and predictions.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mt-4">
+                        <a href="{% url 'student_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-danger">Yes, Delete Permanently</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

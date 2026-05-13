@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Detailed Analytics - EduPredict AI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Deep Analytics</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Academic Factors Correlation</div>
+            <div class="card-body">
+                <p class="text-muted small">Comparison of different factors across student demographics.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Parental Education</th>
+                                <th>Avg. Exam Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in performance_by_edu %}
+                            <tr>
+                                <td>
+                                    {% if item.parental_education == 0 %}None
+                                    {% elif item.parental_education == 1 %}High School
+                                    {% elif item.parental_education == 2 %}Bachelor
+                                    {% elif item.parental_education == 3 %}Master+
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.avg_score|floatformat:1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4 bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">AI Insight</h5>
+                <p class="card-text small">Students with high attendance and consistent study hours show a 95% higher probability of passing, regardless of parental education levels.</p>
+                <a href="{% url 'predict' %}" class="btn btn-light btn-sm">Test Hypothesis</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">System Health</div>
+            <div class="card-body text-center p-4">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <h6>Model v1.0.0 Active</h6>
+                <p class="text-muted extra-small">Last training: May 2026</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

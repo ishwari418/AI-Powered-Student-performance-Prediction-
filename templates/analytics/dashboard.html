@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EduPredict AI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'predict' %}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-plus me-1"></i> New Prediction
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row">
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3"><i class="fas fa-users fa-2x"></i></div>
+                <div>
+                    <div class="small text-white-50">Total Students</div>
+                    <div class="h4 mb-0">{{ total_students }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-danger text-white mb-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3"><i class="fas fa-exclamation-triangle fa-2x"></i></div>
+                <div>
+                    <div class="small text-white-50">At-Risk Students</div>
+                    <div class="h4 mb-0">{{ at_risk }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3"><i class="fas fa-percentage fa-2x"></i></div>
+                <div>
+                    <div class="small text-white-50">Avg. Attendance</div>
+                    <div class="h4 mb-0">{{ avg_attendance }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3"><i class="fas fa-brain fa-2x"></i></div>
+                <div>
+                    <div class="small text-white-50">Predictions Made</div>
+                    <div class="h4 mb-0">{{ total_predictions }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Risk Distribution Chart -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-chart-pie me-1"></i> Student Risk Distribution</div>
+            <div class="card-body">
+                <canvas id="riskChart" width="100%" height="50"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Predictions -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-table me-1"></i> Recent Predictions</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Risk Level</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in recent_predictions %}
+                            <tr>
+                                <td>{{ pred.student.student_id }}</td>
+                                <td>
+                                    <span class="badge {% if pred.risk_level == 'High' %}bg-danger{% elif pred.risk_level == 'Medium' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ pred.risk_level }}
+                                    </span>
+                                </td>
+                                <td>{% if pred.predicted_status == 1 %}Pass{% else %}Fail{% endif %}</td>
+                                <td><a href="{% url 'prediction_detail' pred.pk %}" class="btn btn-sm btn-primary">View</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center">No predictions found</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ risk_labels|safe }},
+            datasets: [{
+                data: {{ risk_data|safe }},
+                backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}

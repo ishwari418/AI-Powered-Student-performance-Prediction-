@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction Results - EduPredict AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Prediction Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">Prediction Summary</div>
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <img src="https://ui-avatars.com/api/?name={{ result.student.first_name }}+{{ result.student.last_name }}&size=80&rounded=true" alt="Student">
+                </div>
+                <h5 class="fw-bold">{{ result.student.first_name }} {{ result.student.last_name }}</h5>
+                <p class="text-muted small">ID: {{ result.student.student_id }}</p>
+                <hr>
+                <div class="mb-3">
+                    <span class="display-6 fw-bold {% if result.predicted_status == 1 %}text-success{% else %}text-danger{% endif %}">
+                        {% if result.predicted_status == 1 %}PASS{% else %}FAIL{% endif %}
+                    </span>
+                    <p class="text-muted mb-0">Predicted Status</p>
+                </div>
+                <div class="d-flex justify-content-between px-3">
+                    <div>
+                        <div class="h5 mb-0">{{ result.confidence_score|floatformat:2 }}</div>
+                        <div class="small text-muted">Confidence</div>
+                    </div>
+                    <div>
+                        <div class="h5 mb-0 text-{% if result.risk_level == 'High' %}danger{% elif result.risk_level == 'Medium' %}warning{% else %}success{% endif %}">
+                            {{ result.risk_level }}
+                        </div>
+                        <div class="small text-muted">Risk Level</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card bg-light border-0">
+            <div class="card-body">
+                <h6 class="fw-bold"><i class="fas fa-lightbulb text-warning me-2"></i> Academic Interventions</h6>
+                <p class="small mb-0">{{ result.recommendations }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Explainable AI Section -->
+        <div class="card">
+            <div class="card-header"><i class="fas fa-search-plus me-1"></i> Explainable AI: Influence Factors</div>
+            <div class="card-body">
+                <p class="text-muted small">This chart shows how each academic factor influenced the AI's prediction. Positive values (blue) contributed to a "Pass" prediction, while negative values (red) pushed towards a "Fail" prediction.</p>
+                <canvas id="shapChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">Academic Data Used</div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-3 border-end">
+                            <div class="h5 mb-0">{{ result.performance_record.attendance }}%</div>
+                            <div class="small text-muted">Attendance</div>
+                        </div>
+                        <div class="col-3 border-end">
+                            <div class="h5 mb-0">{{ result.performance_record.study_hours }}h</div>
+                            <div class="small text-muted">Study Hours</div>
+                        </div>
+                        <div class="col-3 border-end">
+                            <div class="h5 mb-0">{{ result.performance_record.previous_grades }}</div>
+                            <div class="small text-muted">Prev. Grade</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="h5 mb-0">{{ result.performance_record.assignment_completion }}%</div>
+                            <div class="small text-muted">Assignments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const shapData = {{ result.factors_impact|safe }};
+    const labels = Object.keys(shapData);
+    const values = Object.values(shapData);
+
+    new Chart(document.getElementById('shapChart'), {
+        type: 'bar',
+        data: {
+            labels: labels.map(l => l.replace('_', ' ').toUpperCase()),
+            datasets: [{
+                label: 'Feature Influence',
+                data: values,
+                backgroundColor: values.map(v => v >= 0 ? 'rgba(67, 97, 238, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                borderRadius: 5
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}
